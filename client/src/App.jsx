@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
+import DealersPage from './pages/DealersPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
         <Link to="/login" className="text-blue-600 hover:underline">Login</Link>
         <Link to="/register" className="text-blue-600 hover:underline">Register</Link>
         <Link to="/dashboard" className="text-blue-600 hover:underline">Dashboard</Link>
+        <Link to="/dealers" className="text-blue-600 hover:underline">Dealers</Link>
       </nav>
 
       <Routes>
@@ -21,6 +23,14 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dealers"
+          element={
+            <ProtectedRoute>
+              <DealersPage />
             </ProtectedRoute>
           }
         />
