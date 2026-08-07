@@ -4,6 +4,7 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import DealersPage from './pages/DealersPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import WarehousesPage from './pages/WarehousesPage';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Link to="/register" className="text-blue-600 hover:underline">Register</Link>
         <Link to="/dashboard" className="text-blue-600 hover:underline">Dashboard</Link>
         <Link to="/dealers" className="text-blue-600 hover:underline">Dealers</Link>
+        <Link to="/warehouses" className="text-blue-600 hover:underline">Warehouses</Link>
       </nav>
 
       <Routes>
@@ -35,6 +37,14 @@ function App() {
           }
         />
         <Route path="/" element={<LoginPage />} />
+        <Route
+  path="/warehouses"
+  element={
+    <ProtectedRoute>
+      <WarehousesPage />
+    </ProtectedRoute>
+  }
+/>
       </Routes>
     </BrowserRouter>
   );
