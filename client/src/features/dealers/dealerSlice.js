@@ -21,6 +21,25 @@ export const createDealer = createAsyncThunk('dealers/create', async (dealerData
   }
 });
 
+
+export const updateDealer = createAsyncThunk('dealers/update', async ({ id, data }, thunkAPI) => {
+  try {
+    const res = await axios.put(`${API_URL}/${id}`, data, { withCredentials: true });
+    return res.data;
+  } catch (err) {
+    return thunkAPI.rejectWithValue(err.response.data.message);
+  }
+});
+
+export const deleteDealer = createAsyncThunk('dealers/delete', async (id, thunkAPI) => {
+  try {
+    await axios.delete(`${API_URL}/${id}`, { withCredentials: true });
+    return id;
+  } catch (err) {
+    return thunkAPI.rejectWithValue(err.response.data.message);
+  }
+});
+
 const dealerSlice = createSlice({
   name: 'dealers',
   initialState: {
@@ -43,8 +62,15 @@ const dealerSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(createDealer.fulfilled, (state, action) => {
+    .addCase(createDealer.fulfilled, (state, action) => {
         state.list.unshift(action.payload);
+      })
+      .addCase(updateDealer.fulfilled, (state, action) => {
+        const index = state.list.findIndex((d) => d._id === action.payload._id);
+        if (index !== -1) state.list[index] = action.payload;
+      })
+      .addCase(deleteDealer.fulfilled, (state, action) => {
+        state.list = state.list.filter((d) => d._id !== action.payload);
       });
   },
 });

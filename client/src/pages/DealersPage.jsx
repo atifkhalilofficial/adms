@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchDealers, createDealer } from '../features/dealers/dealerSlice';
-
+import { fetchDealers, createDealer, updateDealer, deleteDealer } from '../features/dealers/dealerSlice';
 function DealersPage() {
   const dispatch = useDispatch();
   const { list, loading, error } = useSelector((state) => state.dealers);
@@ -21,6 +20,8 @@ function DealersPage() {
     creditLimit: 0,
   });
 
+  const [editingId, setEditingId] = useState(null);
+
   useEffect(() => {
     dispatch(fetchDealers());
   }, [dispatch]);
@@ -29,36 +30,77 @@ function DealersPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+const resetForm = () => {
+  setForm({
+    name: '',
+    businessName: '',
+    phone: '',
+    email: '',
+    province: '',
+    district: '',
+    city: '',
+    address: '',
+    cnic: '',
+    category: 'retailer',
+    creditLimit: 0,
+  });
+};
+
+
+const handleEdit = (dealer) => {
+  setForm({
+    name: dealer.name,
+    businessName: dealer.businessName,
+    phone: dealer.phone,
+    email: dealer.email || '',
+    province: dealer.province,
+    district: dealer.district,
+    city: dealer.city,
+    address: dealer.address,
+    cnic: dealer.cnic,
+    category: dealer.category,
+    creditLimit: dealer.creditLimit,
+  });
+  setEditingId(dealer._id);
+  setShowForm(true);
+};
+
+const handleDelete = (id) => {
+  if (window.confirm('Delete this dealer?')) {
+    dispatch(deleteDealer(id));
+  }
+};
+
+const handleSubmit = (e) => {
+  e.preventDefault();
+  if (editingId) {
+    dispatch(updateDealer({ id: editingId, data: form })).then(() => {
+      setShowForm(false);
+      setEditingId(null);
+      resetForm();
+    });
+  } else {
     dispatch(createDealer(form)).then(() => {
       setShowForm(false);
-      setForm({
-        name: '',
-        businessName: '',
-        phone: '',
-        email: '',
-        province: '',
-        district: '',
-        city: '',
-        address: '',
-        cnic: '',
-        category: 'retailer',
-        creditLimit: 0,
-      });
+      resetForm();
     });
-  };
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Dealers</h1>
         <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          {showForm ? 'Cancel' : 'Add Dealer'}
-        </button>
+  onClick={() => {
+    setShowForm(!showForm);
+    setEditingId(null);
+    resetForm();
+  }}
+  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+>
+  {showForm ? 'Cancel' : 'Add Dealer'}
+</button>
       </div>
 
       {showForm && (
@@ -156,11 +198,11 @@ function DealersPage() {
             className="border rounded px-3 py-2"
           />
           <button
-            type="submit"
-            className="col-span-2 bg-green-600 text-white py-2 rounded hover:bg-green-700"
-          >
-            Save Dealer
-          </button>
+  type="submit"
+  className="col-span-2 bg-green-600 text-white py-2 rounded hover:bg-green-700"
+>
+  {editingId ? 'Update Dealer' : 'Save Dealer'}
+</button>
         </form>
       )}
 
@@ -179,6 +221,7 @@ function DealersPage() {
               <th className="p-3">Category</th>
               <th className="p-3">Credit Limit</th>
               <th className="p-3">Outstanding</th>
+              <th className="p-3">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -191,6 +234,20 @@ function DealersPage() {
                 <td className="p-3">{dealer.category}</td>
                 <td className="p-3">{dealer.creditLimit}</td>
                 <td className="p-3">{dealer.outstandingBalance}</td>
+                <td className="p-3 flex gap-2">
+  <button
+    onClick={() => handleEdit(dealer)}
+    className="text-blue-600 hover:underline text-sm"
+  >
+    Edit
+  </button>
+  <button
+    onClick={() => handleDelete(dealer._id)}
+    className="text-red-600 hover:underline text-sm"
+  >
+    Delete
+  </button>
+</td>
               </tr>
             ))}
           </tbody>
