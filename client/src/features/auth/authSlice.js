@@ -15,6 +15,18 @@ export const login = createAsyncThunk('auth/login', async (credentials, thunkAPI
   }
 });
 
+export const register = createAsyncThunk('auth/register', async (userData, thunkAPI) => {
+  try {
+    const res = await axios.post(`${API_URL}/register`, userData, {
+      withCredentials: true,
+    });
+    return res.data;
+  } catch (err) {
+    return thunkAPI.rejectWithValue(err.response.data.message);
+  }
+});
+
+
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
@@ -27,21 +39,33 @@ const authSlice = createSlice({
       state.user = null;
     },
   },
-  extraReducers: (builder) => {
-    builder
-      .addCase(login.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(login.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload;
-      })
-      .addCase(login.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
-  },
+ extraReducers: (builder) => {
+  builder
+    .addCase(login.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    })
+    .addCase(login.fulfilled, (state, action) => {
+      state.loading = false;
+      state.user = action.payload;
+    })
+    .addCase(login.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    })
+    .addCase(register.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    })
+    .addCase(register.fulfilled, (state, action) => {
+      state.loading = false;
+      state.user = action.payload;
+    })
+    .addCase(register.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    });
+},
 });
 
 export const { logout } = authSlice.actions;
