@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const dealerRoutes = require('./routes/dealerRoutes');
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(cors({
   credentials: true
 }));
 
+app.use('/api/dealers', dealerRoutes)
 app.use('/api/auth', authRoutes);
 
 app.get('/api/health', (req, res) => {
