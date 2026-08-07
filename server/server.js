@@ -3,6 +3,8 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const dealerRoutes = require('./routes/dealerRoutes');
+const userRoutes = require('./routes/userRoutes');
+
 
 dotenv.config();
 
@@ -10,6 +12,7 @@ const connectDB = require('./config/db');
 connectDB();
 
 const authRoutes = require('./routes/authRoutes');
+const warehouseRoutes = require('./routes/warehouseRoutes');
 
 const app = express();
 
@@ -22,6 +25,8 @@ app.use(cors({
 
 app.use('/api/dealers', dealerRoutes)
 app.use('/api/auth', authRoutes);
+app.use('/api/warehouses', warehouseRoutes);
+app.use('/api/users', userRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
