@@ -4,7 +4,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const dealerRoutes = require('./routes/dealerRoutes');
 const userRoutes = require('./routes/userRoutes');
-
+const productRoutes = require('./routes/productRoutes');
 
 dotenv.config();
 
@@ -27,6 +27,8 @@ app.use('/api/dealers', dealerRoutes)
 app.use('/api/auth', authRoutes);
 app.use('/api/warehouses', warehouseRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
+
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
