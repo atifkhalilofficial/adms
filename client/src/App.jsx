@@ -1,20 +1,34 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import DashboardPage from './pages/DashboardPage';
-import DealersPage from './pages/DealersPage';
-import ProtectedRoute from './components/ProtectedRoute';
-import WarehousesPage from './pages/WarehousesPage';
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import DashboardPage from "./pages/DashboardPage";
+import DealersPage from "./pages/DealersPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import WarehousesPage from "./pages/WarehousesPage";
+import ProductsPage from "./pages/ProductsPage";
 
 function App() {
   return (
     <BrowserRouter>
       <nav className="p-4 bg-white shadow-sm flex gap-4">
-        <Link to="/login" className="text-blue-600 hover:underline">Login</Link>
-        <Link to="/register" className="text-blue-600 hover:underline">Register</Link>
-        <Link to="/dashboard" className="text-blue-600 hover:underline">Dashboard</Link>
-        <Link to="/dealers" className="text-blue-600 hover:underline">Dealers</Link>
-        <Link to="/warehouses" className="text-blue-600 hover:underline">Warehouses</Link>
+        <Link to="/login" className="text-blue-600 hover:underline">
+          Login
+        </Link>
+        <Link to="/register" className="text-blue-600 hover:underline">
+          Register
+        </Link>
+        <Link to="/dashboard" className="text-blue-600 hover:underline">
+          Dashboard
+        </Link>
+        <Link to="/dealers" className="text-blue-600 hover:underline">
+          Dealers
+        </Link>
+        <Link to="/warehouses" className="text-blue-600 hover:underline">
+          Warehouses
+        </Link>
+        <Link to="/products" className="text-blue-600 hover:underline">
+          Products
+        </Link>
       </nav>
 
       <Routes>
@@ -38,13 +52,22 @@ function App() {
         />
         <Route path="/" element={<LoginPage />} />
         <Route
-  path="/warehouses"
-  element={
-    <ProtectedRoute>
-      <WarehousesPage />
-    </ProtectedRoute>
-  }
-/>
+          path="/warehouses"
+          element={
+            <ProtectedRoute>
+              <WarehousesPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/products"
+          element={
+            <ProtectedRoute>
+              <ProductsPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
