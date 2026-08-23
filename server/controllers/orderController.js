@@ -1,6 +1,7 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const InventoryTransaction = require('../models/InventoryTransaction');
+const Dealer = require('../models/Dealer');
 
 
 // @route  POST /api/orders
@@ -32,6 +33,12 @@ const createOrder = async (req, res) => {
       totalAmount,
       createdBy: req.user._id,
     });
+
+        const dealerDoc = await Dealer.findById(dealer);
+    if (dealerDoc) {
+      dealerDoc.outstandingBalance += totalAmount;
+      await dealerDoc.save();
+    }
 
     await order.populate([
       { path: 'dealer', select: 'name businessName' },
