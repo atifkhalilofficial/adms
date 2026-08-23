@@ -1,18 +1,18 @@
-const express = require('express');
 const dotenv = require('dotenv');
+dotenv.config();
+
+const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const dealerRoutes = require('./routes/dealerRoutes');
-const userRoutes = require('./routes/userRoutes');
-const productRoutes = require('./routes/productRoutes');
-
-dotenv.config();
 
 const connectDB = require('./config/db');
 connectDB();
 
 const authRoutes = require('./routes/authRoutes');
+const dealerRoutes = require('./routes/dealerRoutes');
 const warehouseRoutes = require('./routes/warehouseRoutes');
+const userRoutes = require('./routes/userRoutes');
+const productRoutes = require('./routes/productRoutes');
 
 const app = express();
 
@@ -23,12 +23,11 @@ app.use(cors({
   credentials: true
 }));
 
-app.use('/api/dealers', dealerRoutes)
 app.use('/api/auth', authRoutes);
+app.use('/api/dealers', dealerRoutes);
 app.use('/api/warehouses', warehouseRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
-
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
