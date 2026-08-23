@@ -13,6 +13,8 @@ const dealerRoutes = require('./routes/dealerRoutes');
 const warehouseRoutes = require('./routes/warehouseRoutes');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
+const inventoryRoutes = require('./routes/inventoryRoutes');
+
 
 const app = express();
 
@@ -28,6 +30,8 @@ app.use('/api/dealers', dealerRoutes);
 app.use('/api/warehouses', warehouseRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/inventory', inventoryRoutes);
+
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
