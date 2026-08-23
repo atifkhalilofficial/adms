@@ -4,7 +4,7 @@ import dealerReducer from '../features/dealers/dealerSlice';
 import warehouseReducer from '../features/warehouses/warehouseSlice';
 import productReducer from '../features/products/productSlice';
 import inventoryReducer from '../features/inventory/inventorySlice';
-
+import orderReducer from '../features/orders/orderSlice';
 
 export const store = configureStore({
   reducer: {
@@ -13,6 +13,7 @@ export const store = configureStore({
     warehouses: warehouseReducer,
     products: productReducer,
     inventory: inventoryReducer,
+    orders: orderReducer,
   },
 });
 
