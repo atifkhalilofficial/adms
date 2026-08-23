@@ -1,5 +1,7 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const InventoryTransaction = require('../models/InventoryTransaction');
+
 
 // @route  POST /api/orders
 const createOrder = async (req, res) => {
@@ -79,6 +81,7 @@ const getOrderById = async (req, res) => {
 };
 
 // @route  PUT /api/orders/:id/status
+// @route  PUT /api/orders/:id/status
 const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -86,6 +89,56 @@ const updateOrderStatus = async (req, res) => {
     const order = await Order.findById(req.params.id);
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Moving to "shipped" for the first time: deduct stock
+    if (status === 'shipped' && !order.stockDeducted) {
+      for (const item of order.items) {
+        const product = await Product.findById(item.product);
+        if (!product) continue;
+
+        if (product.currentStock < item.quantity) {
+          return res.status(400).json({
+            message: `Not enough stock for ${product.name}. Current stock is ${product.currentStock}.`,
+          });
+        }
+
+        product.currentStock -= item.quantity;
+        await product.save();
+
+        await InventoryTransaction.create({
+          product: product._id,
+          warehouse: order.warehouse,
+          type: 'out',
+          quantity: item.quantity,
+          reason: 'sale',
+          notes: `Order ${order._id}`,
+          createdBy: req.user._id,
+        });
+      }
+      order.stockDeducted = true;
+    }
+
+    // Cancelling an order that already had stock deducted: restore it
+    if (status === 'cancelled' && order.stockDeducted) {
+      for (const item of order.items) {
+        const product = await Product.findById(item.product);
+        if (!product) continue;
+
+        product.currentStock += item.quantity;
+        await product.save();
+
+        await InventoryTransaction.create({
+          product: product._id,
+          warehouse: order.warehouse,
+          type: 'in',
+          quantity: item.quantity,
+          reason: 'correction',
+          notes: `Order ${order._id} cancelled — stock restored`,
+          createdBy: req.user._id,
+        });
+      }
+      order.stockDeducted = false;
     }
 
     order.status = status;

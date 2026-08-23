@@ -44,11 +44,10 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    status: {
-      type: String,
-      enum: ['pending', 'approved', 'shipped', 'delivered', 'cancelled'],
-      default: 'pending',
-    },
+    stockDeducted: {
+  type: Boolean,
+  default: false,
+},
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
