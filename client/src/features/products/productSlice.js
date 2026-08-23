@@ -39,6 +39,24 @@ export const deleteProduct = createAsyncThunk('products/delete', async (id, thun
   }
 });
 
+export const uploadProductImage = createAsyncThunk(
+  'products/uploadImage',
+  async ({ id, file }, thunkAPI) => {
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const res = await axios.post(`${API_URL}/${id}/image`, formData, {
+        withCredentials: true,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return res.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.response.data.message);
+    }
+  }
+);
+
 const productSlice = createSlice({
   name: 'products',
   initialState: {
@@ -73,6 +91,10 @@ const productSlice = createSlice({
       })
       .addCase(deleteProduct.fulfilled, (state, action) => {
         state.list = state.list.filter((p) => p._id !== action.payload);
+      })
+      .addCase(uploadProductImage.fulfilled, (state, action) => {
+        const index = state.list.findIndex((p) => p._id === action.payload._id);
+        if (index !== -1) state.list[index] = action.payload;
       });
   },
 });

@@ -6,6 +6,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  uploadProductImage,
 } from '../features/products/productSlice';
 
 function ProductsPage() {
@@ -93,6 +94,13 @@ function ProductsPage() {
   const handleDelete = (id) => {
     if (window.confirm('Delete this product?')) {
       dispatch(deleteProduct(id));
+    }
+  };
+
+  const handleImageUpload = (id, e) => {
+    const file = e.target.files[0];
+    if (file) {
+      dispatch(uploadProductImage({ id, file }));
     }
   };
 
@@ -217,6 +225,7 @@ function ProductsPage() {
               <th className="p-3">Price</th>
               <th className="p-3">Stock</th>
               <th className="p-3">Warehouse</th>
+              <th className="p-3">Image</th>
               <th className="p-3">Actions</th>
             </tr>
           </thead>
@@ -234,6 +243,25 @@ function ProductsPage() {
                   )}
                 </td>
                 <td className="p-3">{product.warehouse?.name || '—'}</td>
+                <td className="p-3">
+                  {product.image ? (
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-12 h-12 object-cover rounded"
+                    />
+                  ) : (
+                    <label className="text-blue-600 text-sm cursor-pointer hover:underline">
+                      Upload
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(product._id, e)}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </td>
                 <td className="p-3 flex gap-2">
                   <button
                     onClick={() => handleEdit(product)}
