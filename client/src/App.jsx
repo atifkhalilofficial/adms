@@ -6,6 +6,8 @@ import DealersPage from "./pages/DealersPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import WarehousesPage from "./pages/WarehousesPage";
 import ProductsPage from "./pages/ProductsPage";
+import InventoryPage from "./pages/InventoryPage";
+
 
 function App() {
   return (
@@ -29,6 +31,10 @@ function App() {
         <Link to="/products" className="text-blue-600 hover:underline">
           Products
         </Link>
+        <Link to="/inventory" className="text-blue-600 hover:underline">
+          Inventory
+        </Link>
+
       </nav>
 
       <Routes>
@@ -68,6 +74,15 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/inventory"
+          element={
+            <ProtectedRoute>
+              <InventoryPage />
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   );
