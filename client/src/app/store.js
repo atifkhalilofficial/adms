@@ -5,6 +5,7 @@ import warehouseReducer from '../features/warehouses/warehouseSlice';
 import productReducer from '../features/products/productSlice';
 import inventoryReducer from '../features/inventory/inventorySlice';
 import orderReducer from '../features/orders/orderSlice';
+import paymentReducer from '../features/payments/paymentSlice';
 
 export const store = configureStore({
   reducer: {
@@ -14,7 +15,6 @@ export const store = configureStore({
     products: productReducer,
     inventory: inventoryReducer,
     orders: orderReducer,
+    payments: paymentReducer,
   },
 });
-
-

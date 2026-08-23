@@ -7,7 +7,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import WarehousesPage from "./pages/WarehousesPage";
 import ProductsPage from "./pages/ProductsPage";
 import InventoryPage from "./pages/InventoryPage";
-import OrdersPage from './pages/OrdersPage';
+import OrdersPage from "./pages/OrdersPage";
+import PaymentsPage from "./pages/PaymentsPage";
 
 function App() {
   return (
@@ -34,7 +35,12 @@ function App() {
         <Link to="/inventory" className="text-blue-600 hover:underline">
           Inventory
         </Link>
-        <Link to="/orders" className="text-blue-600 hover:underline">Orders</Link>
+        <Link to="/orders" className="text-blue-600 hover:underline">
+          Orders
+        </Link>
+        <Link to="/payments" className="text-blue-600 hover:underline">
+          Payments
+        </Link>
       </nav>
 
       <Routes>
@@ -82,16 +88,23 @@ function App() {
             </ProtectedRoute>
           }
         />
-<Route
-  path="/orders"
-  element={
-    <ProtectedRoute>
-      <OrdersPage />
-    </ProtectedRoute>
-  }
-/>
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <OrdersPage />
+            </ProtectedRoute>
+          }
+        />
 
-
+        <Route
+          path="/payments"
+          element={
+            <ProtectedRoute>
+              <PaymentsPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
