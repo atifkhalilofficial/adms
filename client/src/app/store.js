@@ -6,6 +6,8 @@ import productReducer from '../features/products/productSlice';
 import inventoryReducer from '../features/inventory/inventorySlice';
 import orderReducer from '../features/orders/orderSlice';
 import paymentReducer from '../features/payments/paymentSlice';
+import supplierReducer from '../features/suppliers/supplierSlice';
+import purchaseReducer from '../features/purchases/purchaseSlice';
 
 export const store = configureStore({
   reducer: {
@@ -16,5 +18,7 @@ export const store = configureStore({
     inventory: inventoryReducer,
     orders: orderReducer,
     payments: paymentReducer,
+    suppliers: supplierReducer,
+    purchases: purchaseReducer,
   },
 });

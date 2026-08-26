@@ -9,6 +9,9 @@ import ProductsPage from "./pages/ProductsPage";
 import InventoryPage from "./pages/InventoryPage";
 import OrdersPage from "./pages/OrdersPage";
 import PaymentsPage from "./pages/PaymentsPage";
+import SuppliersPage from './pages/SuppliersPage';
+import PurchasesPage from './pages/PurchasesPage';
+
 
 function App() {
   return (
@@ -41,6 +44,8 @@ function App() {
         <Link to="/payments" className="text-blue-600 hover:underline">
           Payments
         </Link>
+        <Link to="/suppliers" className="text-blue-600 hover:underline">Suppliers</Link>
+        <Link to="/purchases" className="text-blue-600 hover:underline">Purchases</Link>
       </nav>
 
       <Routes>
@@ -105,6 +110,24 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+  path="/suppliers"
+  element={
+    <ProtectedRoute>
+      <SuppliersPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/purchases"
+  element={
+    <ProtectedRoute>
+      <PurchasesPage />
+    </ProtectedRoute>
+  }
+/>
       </Routes>
     </BrowserRouter>
   );
