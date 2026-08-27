@@ -18,6 +18,9 @@ const orderRoutes = require('./routes/orderRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
 const purchaseRoutes = require('./routes/purchaseRoutes');
+const vehicleRoutes = require('./routes/vehicleRoutes');
+const deliveryRoutes = require('./routes/deliveryRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const app = express();
 
@@ -38,6 +41,10 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/purchases', purchaseRoutes);
+app.use('/api/vehicles', vehicleRoutes);
+app.use('/api/deliveries', deliveryRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
