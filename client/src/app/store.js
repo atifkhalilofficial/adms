@@ -8,6 +8,8 @@ import orderReducer from '../features/orders/orderSlice';
 import paymentReducer from '../features/payments/paymentSlice';
 import supplierReducer from '../features/suppliers/supplierSlice';
 import purchaseReducer from '../features/purchases/purchaseSlice';
+import vehicleReducer from '../features/vehicles/vehicleSlice';
+import deliveryReducer from '../features/deliveries/deliverySlice';
 
 export const store = configureStore({
   reducer: {
@@ -20,5 +22,7 @@ export const store = configureStore({
     payments: paymentReducer,
     suppliers: supplierReducer,
     purchases: purchaseReducer,
+    vehicles: vehicleReducer,
+    deliveries: deliveryReducer,
   },
 });

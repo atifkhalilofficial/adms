@@ -9,9 +9,10 @@ import ProductsPage from "./pages/ProductsPage";
 import InventoryPage from "./pages/InventoryPage";
 import OrdersPage from "./pages/OrdersPage";
 import PaymentsPage from "./pages/PaymentsPage";
-import SuppliersPage from './pages/SuppliersPage';
-import PurchasesPage from './pages/PurchasesPage';
-
+import SuppliersPage from "./pages/SuppliersPage";
+import PurchasesPage from "./pages/PurchasesPage";
+import VehiclesPage from "./pages/VehiclesPage";
+import DeliveriesPage from "./pages/DeliveriesPage";
 
 function App() {
   return (
@@ -44,8 +45,18 @@ function App() {
         <Link to="/payments" className="text-blue-600 hover:underline">
           Payments
         </Link>
-        <Link to="/suppliers" className="text-blue-600 hover:underline">Suppliers</Link>
-        <Link to="/purchases" className="text-blue-600 hover:underline">Purchases</Link>
+        <Link to="/suppliers" className="text-blue-600 hover:underline">
+          Suppliers
+        </Link>
+        <Link to="/purchases" className="text-blue-600 hover:underline">
+          Purchases
+        </Link>
+        <Link to="/vehicles" className="text-blue-600 hover:underline">
+          Vehicles
+        </Link>
+        <Link to="/deliveries" className="text-blue-600 hover:underline">
+          Deliveries
+        </Link>
       </nav>
 
       <Routes>
@@ -112,22 +123,39 @@ function App() {
         />
 
         <Route
-  path="/suppliers"
-  element={
-    <ProtectedRoute>
-      <SuppliersPage />
-    </ProtectedRoute>
-  }
-/>
+          path="/suppliers"
+          element={
+            <ProtectedRoute>
+              <SuppliersPage />
+            </ProtectedRoute>
+          }
+        />
 
-<Route
-  path="/purchases"
-  element={
-    <ProtectedRoute>
-      <PurchasesPage />
-    </ProtectedRoute>
-  }
-/>
+        <Route
+          path="/purchases"
+          element={
+            <ProtectedRoute>
+              <PurchasesPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/vehicles"
+          element={
+            <ProtectedRoute>
+              <VehiclesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/deliveries"
+          element={
+            <ProtectedRoute>
+              <DeliveriesPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
