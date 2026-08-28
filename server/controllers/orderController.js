@@ -2,7 +2,7 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 const InventoryTransaction = require('../models/InventoryTransaction');
 const Dealer = require('../models/Dealer');
-
+const createNotification = require('../utils/createNotification');
 
 // @route  POST /api/orders
 const createOrder = async (req, res) => {
@@ -113,6 +113,14 @@ const updateOrderStatus = async (req, res) => {
         product.currentStock -= item.quantity;
         await product.save();
 
+
+                if (product.currentStock <= product.minimumStock) {
+          await createNotification(
+            'low_stock',
+            `${product.name} is low on stock (${product.currentStock} remaining, minimum is ${product.minimumStock})`,
+            product._id
+          );
+        }
         await InventoryTransaction.create({
           product: product._id,
           warehouse: order.warehouse,

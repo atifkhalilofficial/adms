@@ -1,5 +1,7 @@
 const InventoryTransaction = require('../models/InventoryTransaction');
 const Product = require('../models/Product');
+const createNotification = require('../utils/createNotification');
+
 
 // @route  POST /api/inventory
 const createTransaction = async (req, res) => {
@@ -32,6 +34,14 @@ const createTransaction = async (req, res) => {
         ? productDoc.currentStock + quantity
         : productDoc.currentStock - quantity;
     await productDoc.save();
+
+    if (type === 'out' && productDoc.currentStock <= productDoc.minimumStock) {
+      await createNotification(
+        'low_stock',
+        `${productDoc.name} is low on stock (${productDoc.currentStock} remaining, minimum is ${productDoc.minimumStock})`,
+        productDoc._id
+      );
+    }
 
     await transaction.populate([
       { path: 'product', select: 'name sku currentStock' },
