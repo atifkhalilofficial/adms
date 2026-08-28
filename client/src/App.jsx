@@ -13,51 +13,36 @@ import SuppliersPage from "./pages/SuppliersPage";
 import PurchasesPage from "./pages/PurchasesPage";
 import VehiclesPage from "./pages/VehiclesPage";
 import DeliveriesPage from "./pages/DeliveriesPage";
+import ReportsPage from './pages/ReportsPage';
+import { useSelector } from 'react-redux';
+import { navLinks } from './utils/permissions';
+import NotificationBell from './components/NotificationBell';
 
 function App() {
+  const { user } = useSelector((state) => state.auth);
+
+  const visibleLinks = user
+    ? navLinks.filter((link) => link.roles.includes(user.role))
+    : [];
+
   return (
     <BrowserRouter>
-      <nav className="p-4 bg-white shadow-sm flex gap-4">
-        <Link to="/login" className="text-blue-600 hover:underline">
-          Login
-        </Link>
-        <Link to="/register" className="text-blue-600 hover:underline">
-          Register
-        </Link>
-        <Link to="/dashboard" className="text-blue-600 hover:underline">
-          Dashboard
-        </Link>
-        <Link to="/dealers" className="text-blue-600 hover:underline">
-          Dealers
-        </Link>
-        <Link to="/warehouses" className="text-blue-600 hover:underline">
-          Warehouses
-        </Link>
-        <Link to="/products" className="text-blue-600 hover:underline">
-          Products
-        </Link>
-        <Link to="/inventory" className="text-blue-600 hover:underline">
-          Inventory
-        </Link>
-        <Link to="/orders" className="text-blue-600 hover:underline">
-          Orders
-        </Link>
-        <Link to="/payments" className="text-blue-600 hover:underline">
-          Payments
-        </Link>
-        <Link to="/suppliers" className="text-blue-600 hover:underline">
-          Suppliers
-        </Link>
-        <Link to="/purchases" className="text-blue-600 hover:underline">
-          Purchases
-        </Link>
-        <Link to="/vehicles" className="text-blue-600 hover:underline">
-          Vehicles
-        </Link>
-        <Link to="/deliveries" className="text-blue-600 hover:underline">
-          Deliveries
-        </Link>
-      </nav>
+      <nav className="p-4 bg-white shadow-sm flex gap-4 flex-wrap items-center justify-between">
+  <div className="flex gap-4 flex-wrap items-center">
+    {!user && (
+      <>
+        <Link to="/login" className="text-blue-600 hover:underline">Login</Link>
+        <Link to="/register" className="text-blue-600 hover:underline">Register</Link>
+      </>
+    )}
+    {visibleLinks.map((link) => (
+      <Link key={link.to} to={link.to} className="text-blue-600 hover:underline">
+        {link.label}
+      </Link>
+    ))}
+  </div>
+  {user && <NotificationBell />}
+</nav>
 
       <Routes>
         <Route path="/login" element={<LoginPage />} />
@@ -78,7 +63,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/" element={<LoginPage />} />
         <Route
           path="/warehouses"
           element={
@@ -87,7 +71,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/products"
           element={
@@ -112,7 +95,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/payments"
           element={
@@ -121,7 +103,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/suppliers"
           element={
@@ -130,7 +111,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/purchases"
           element={
@@ -139,7 +119,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/vehicles"
           element={
@@ -156,9 +135,19 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute>
+              <ReportsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/" element={<LoginPage />} />
       </Routes>
     </BrowserRouter>
   );
 }
 
 export default App;
+

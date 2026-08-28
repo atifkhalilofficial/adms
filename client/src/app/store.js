@@ -10,6 +10,7 @@ import supplierReducer from '../features/suppliers/supplierSlice';
 import purchaseReducer from '../features/purchases/purchaseSlice';
 import vehicleReducer from '../features/vehicles/vehicleSlice';
 import deliveryReducer from '../features/deliveries/deliverySlice';
+import notificationReducer from '../features/notifications/notificationSlice';
 
 export const store = configureStore({
   reducer: {
@@ -24,5 +25,6 @@ export const store = configureStore({
     purchases: purchaseReducer,
     vehicles: vehicleReducer,
     deliveries: deliveryReducer,
+    notifications: notificationReducer,
   },
 });
