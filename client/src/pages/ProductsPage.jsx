@@ -1,56 +1,67 @@
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
-import toast from 'react-hot-toast';
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import toast from "react-hot-toast";
 import {
   fetchProducts,
   createProduct,
   updateProduct,
   deleteProduct,
   uploadProductImage,
-} from '../features/products/productSlice';
-import TableSkeleton from '../components/TableSkeleton';
-import EmptyState from '../components/EmptyState';
+} from "../features/products/productSlice";
+import TableSkeleton from "../components/TableSkeleton";
+import EmptyState from "../components/EmptyState";
+import { usePaginatedSearch } from "../hooks/usePaginatedSearch";
+import Pagination from "../components/Pagination";
 
 function ProductsPage() {
   const dispatch = useDispatch();
   const { list, loading } = useSelector((state) => state.products);
+  const {
+    search,
+    setSearch,
+    page,
+    setPage,
+    totalPages,
+    paginated,
+    totalResults,
+  } = usePaginatedSearch(list, ["name", "sku", "category", "warehouse.name"]);
 
   const [warehouses, setWarehouses] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({
-    name: '',
-    sku: '',
-    category: '',
-    brand: '',
-    bagSize: '',
+    name: "",
+    sku: "",
+    category: "",
+    brand: "",
+    bagSize: "",
     price: 0,
     openingStock: 0,
     minimumStock: 10,
-    warehouse: '',
+    warehouse: "",
   });
 
   useEffect(() => {
     dispatch(fetchProducts());
 
     axios
-      .get('http://localhost:5000/api/warehouses', { withCredentials: true })
+      .get("http://localhost:5000/api/warehouses", { withCredentials: true })
       .then((res) => setWarehouses(res.data))
-      .catch((err) => console.error('Failed to load warehouses', err));
+      .catch((err) => console.error("Failed to load warehouses", err));
   }, [dispatch]);
 
   const resetForm = () => {
     setForm({
-      name: '',
-      sku: '',
-      category: '',
-      brand: '',
-      bagSize: '',
+      name: "",
+      sku: "",
+      category: "",
+      brand: "",
+      bagSize: "",
       price: 0,
       openingStock: 0,
       minimumStock: 10,
-      warehouse: '',
+      warehouse: "",
     });
   };
 
@@ -63,22 +74,22 @@ function ProductsPage() {
     if (editingId) {
       dispatch(updateProduct({ id: editingId, data: form })).then((result) => {
         if (!result.error) {
-          toast.success('Product updated');
+          toast.success("Product updated");
           setShowForm(false);
           setEditingId(null);
           resetForm();
         } else {
-          toast.error(result.payload || 'Failed to update product');
+          toast.error(result.payload || "Failed to update product");
         }
       });
     } else {
       dispatch(createProduct(form)).then((result) => {
         if (!result.error) {
-          toast.success('Product added');
+          toast.success("Product added");
           setShowForm(false);
           resetForm();
         } else {
-          toast.error(result.payload || 'Failed to add product');
+          toast.error(result.payload || "Failed to add product");
         }
       });
     }
@@ -89,24 +100,24 @@ function ProductsPage() {
       name: product.name,
       sku: product.sku,
       category: product.category,
-      brand: product.brand || '',
-      bagSize: product.bagSize || '',
+      brand: product.brand || "",
+      bagSize: product.bagSize || "",
       price: product.price,
       openingStock: product.openingStock,
       minimumStock: product.minimumStock,
-      warehouse: product.warehouse?._id || '',
+      warehouse: product.warehouse?._id || "",
     });
     setEditingId(product._id);
     setShowForm(true);
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Delete this product?')) {
+    if (window.confirm("Delete this product?")) {
       dispatch(deleteProduct(id)).then((result) => {
         if (!result.error) {
-          toast.success('Product deleted');
+          toast.success("Product deleted");
         } else {
-          toast.error(result.payload || 'Failed to delete product');
+          toast.error(result.payload || "Failed to delete product");
         }
       });
     }
@@ -117,9 +128,9 @@ function ProductsPage() {
     if (file) {
       const uploadPromise = dispatch(uploadProductImage({ id, file })).unwrap();
       toast.promise(uploadPromise, {
-        loading: 'Uploading image...',
-        success: 'Image uploaded',
-        error: 'Failed to upload image',
+        loading: "Uploading image...",
+        success: "Image uploaded",
+        error: "Failed to upload image",
       });
     }
   };
@@ -136,7 +147,7 @@ function ProductsPage() {
           }}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
-          {showForm ? 'Cancel' : 'Add Product'}
+          {showForm ? "Cancel" : "Add Product"}
         </button>
       </div>
 
@@ -226,20 +237,35 @@ function ProductsPage() {
             type="submit"
             className="col-span-2 bg-green-600 text-white py-2 rounded hover:bg-green-700"
           >
-            {editingId ? 'Update Product' : 'Save Product'}
+            {editingId ? "Update Product" : "Save Product"}
           </button>
         </form>
       )}
 
+      <div className="mb-4 flex items-center justify-between">
+        <input
+          type="text"
+          placeholder="Search by name, SKU, category, warehouse..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border rounded px-3 py-2 w-80"
+        />
+        <span className="text-sm text-gray-500">{totalResults} product(s)</span>
+      </div>
+
       {loading ? (
         <TableSkeleton rows={5} columns={8} />
-      ) : list.length === 0 ? (
+      ) : totalResults === 0 ? (
         <EmptyState
           icon="📦"
-          title="No products yet"
-          description="Add your first product to start tracking stock."
-          actionLabel="Add Product"
-          onAction={() => setShowForm(true)}
+          title={search ? "No matching products" : "No products yet"}
+          description={
+            search
+              ? "Try a different search term."
+              : "Add your first product to start tracking stock."
+          }
+          actionLabel={search ? undefined : "Add Product"}
+          onAction={search ? undefined : () => setShowForm(true)}
         />
       ) : (
         <table className="w-full bg-white rounded-lg shadow-md">
@@ -256,7 +282,7 @@ function ProductsPage() {
             </tr>
           </thead>
           <tbody>
-            {list.map((product) => (
+            {paginated.map((product) => (
               <tr key={product._id} className="border-b">
                 <td className="p-3">{product.name}</td>
                 <td className="p-3">{product.sku}</td>
@@ -265,10 +291,12 @@ function ProductsPage() {
                 <td className="p-3">
                   {product.currentStock}
                   {product.currentStock <= product.minimumStock && (
-                    <span className="ml-2 text-xs text-red-600 font-semibold">Low</span>
+                    <span className="ml-2 text-xs text-red-600 font-semibold">
+                      Low
+                    </span>
                   )}
                 </td>
-                <td className="p-3">{product.warehouse?.name || '—'}</td>
+                <td className="p-3">{product.warehouse?.name || "—"}</td>
                 <td className="p-3">
                   {product.image ? (
                     <img
@@ -306,7 +334,11 @@ function ProductsPage() {
             ))}
           </tbody>
         </table>
-      )}
+)}
+{!loading && totalResults > 0 && (
+  <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+)}
+    
     </div>
   );
 }

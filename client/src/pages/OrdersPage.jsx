@@ -1,47 +1,62 @@
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
-import toast from 'react-hot-toast';
-import { fetchOrders, createOrder, updateOrderStatus } from '../features/orders/orderSlice';
-import TableSkeleton from '../components/TableSkeleton';
-import EmptyState from '../components/EmptyState';
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import toast from "react-hot-toast";
+import {
+  fetchOrders,
+  createOrder,
+  updateOrderStatus,
+} from "../features/orders/orderSlice";
+import TableSkeleton from "../components/TableSkeleton";
+import EmptyState from "../components/EmptyState";
+import { usePaginatedSearch } from "../hooks/usePaginatedSearch";
+import Pagination from "../components/Pagination";
 
 function OrdersPage() {
   const dispatch = useDispatch();
   const { list, loading } = useSelector((state) => state.orders);
+  const {
+    search,
+    setSearch,
+    page,
+    setPage,
+    totalPages,
+    paginated,
+    totalResults,
+  } = usePaginatedSearch(list, ["dealer.name", "warehouse.name", "status"]);
 
   const [dealers, setDealers] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
   const [products, setProducts] = useState([]);
   const [showForm, setShowForm] = useState(false);
 
-  const [dealer, setDealer] = useState('');
-  const [warehouse, setWarehouse] = useState('');
-  const [items, setItems] = useState([{ product: '', quantity: 1 }]);
+  const [dealer, setDealer] = useState("");
+  const [warehouse, setWarehouse] = useState("");
+  const [items, setItems] = useState([{ product: "", quantity: 1 }]);
 
   useEffect(() => {
     dispatch(fetchOrders());
 
     axios
-      .get('http://localhost:5000/api/dealers', { withCredentials: true })
+      .get("http://localhost:5000/api/dealers", { withCredentials: true })
       .then((res) => setDealers(res.data))
-      .catch((err) => console.error('Failed to load dealers', err));
+      .catch((err) => console.error("Failed to load dealers", err));
 
     axios
-      .get('http://localhost:5000/api/warehouses', { withCredentials: true })
+      .get("http://localhost:5000/api/warehouses", { withCredentials: true })
       .then((res) => setWarehouses(res.data))
-      .catch((err) => console.error('Failed to load warehouses', err));
+      .catch((err) => console.error("Failed to load warehouses", err));
 
     axios
-      .get('http://localhost:5000/api/products', { withCredentials: true })
+      .get("http://localhost:5000/api/products", { withCredentials: true })
       .then((res) => setProducts(res.data))
-      .catch((err) => console.error('Failed to load products', err));
+      .catch((err) => console.error("Failed to load products", err));
   }, [dispatch]);
 
   const resetForm = () => {
-    setDealer('');
-    setWarehouse('');
-    setItems([{ product: '', quantity: 1 }]);
+    setDealer("");
+    setWarehouse("");
+    setItems([{ product: "", quantity: 1 }]);
   };
 
   const handleItemChange = (index, field, value) => {
@@ -51,7 +66,7 @@ function OrdersPage() {
   };
 
   const addItemRow = () => {
-    setItems([...items, { product: '', quantity: 1 }]);
+    setItems([...items, { product: "", quantity: 1 }]);
   };
 
   const removeItemRow = (index) => {
@@ -78,11 +93,11 @@ function OrdersPage() {
     };
     dispatch(createOrder(orderData)).then((result) => {
       if (!result.error) {
-        toast.success('Order placed');
+        toast.success("Order placed");
         setShowForm(false);
         resetForm();
       } else {
-        toast.error(result.payload || 'Failed to place order');
+        toast.error(result.payload || "Failed to place order");
       }
     });
   };
@@ -92,7 +107,7 @@ function OrdersPage() {
       if (!result.error) {
         toast.success(`Order marked as ${status}`);
       } else {
-        toast.error(result.payload || 'Failed to update order status');
+        toast.error(result.payload || "Failed to update order status");
       }
     });
   };
@@ -108,12 +123,15 @@ function OrdersPage() {
           }}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
-          {showForm ? 'Cancel' : 'New Order'}
+          {showForm ? "Cancel" : "New Order"}
         </button>
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md mb-6">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white p-6 rounded-lg shadow-md mb-6"
+        >
           <div className="grid grid-cols-2 gap-4 mb-4">
             <select
               value={dealer}
@@ -149,7 +167,9 @@ function OrdersPage() {
             <div key={index} className="flex gap-3 mb-3 items-center">
               <select
                 value={item.product}
-                onChange={(e) => handleItemChange(index, 'product', e.target.value)}
+                onChange={(e) =>
+                  handleItemChange(index, "product", e.target.value)
+                }
                 className="border rounded px-3 py-2 flex-1"
                 required
               >
@@ -165,7 +185,9 @@ function OrdersPage() {
                 type="number"
                 min="1"
                 value={item.quantity}
-                onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
+                onChange={(e) =>
+                  handleItemChange(index, "quantity", e.target.value)
+                }
                 className="border rounded px-3 py-2 w-24"
                 required
               />
@@ -204,15 +226,30 @@ function OrdersPage() {
         </form>
       )}
 
+      <div className="mb-4 flex items-center justify-between">
+        <input
+          type="text"
+          placeholder="Search by dealer, warehouse, status..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border rounded px-3 py-2 w-80"
+        />
+        <span className="text-sm text-gray-500">{totalResults} order(s)</span>
+      </div>
+
       {loading ? (
         <TableSkeleton rows={5} columns={6} />
-      ) : list.length === 0 ? (
+      ) : totalResults === 0 ? (
         <EmptyState
           icon="🧾"
-          title="No orders yet"
-          description="Create your first order to get started."
-          actionLabel="New Order"
-          onAction={() => setShowForm(true)}
+          title={search ? "No matching orders" : "No orders yet"}
+          description={
+            search
+              ? "Try a different search term."
+              : "Create your first order to get started."
+          }
+          actionLabel={search ? undefined : "New Order"}
+          onAction={search ? undefined : () => setShowForm(true)}
         />
       ) : (
         <table className="w-full bg-white rounded-lg shadow-md">
@@ -227,23 +264,29 @@ function OrdersPage() {
             </tr>
           </thead>
           <tbody>
-            {list.map((order) => (
+            {paginated.map((order) => (
               <tr key={order._id} className="border-b align-top">
-                <td className="p-3">{new Date(order.createdAt).toLocaleDateString()}</td>
-                <td className="p-3">{order.dealer?.name || '—'}</td>
-                <td className="p-3">{order.warehouse?.name || '—'}</td>
+                <td className="p-3">
+                  {new Date(order.createdAt).toLocaleDateString()}
+                </td>
+                <td className="p-3">{order.dealer?.name || "—"}</td>
+                <td className="p-3">{order.warehouse?.name || "—"}</td>
                 <td className="p-3">
                   {order.items.map((item, i) => (
                     <div key={i} className="text-sm">
-                      {item.product?.name || 'Unknown'} × {item.quantity}
+                      {item.product?.name || "Unknown"} × {item.quantity}
                     </div>
                   ))}
                 </td>
-                <td className="p-3">Rs. {order.totalAmount.toLocaleString()}</td>
+                <td className="p-3">
+                  Rs. {order.totalAmount.toLocaleString()}
+                </td>
                 <td className="p-3">
                   <select
                     value={order.status}
-                    onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                    onChange={(e) =>
+                      handleStatusChange(order._id, e.target.value)
+                    }
                     className="border rounded px-2 py-1 text-sm"
                   >
                     <option value="pending">Pending</option>
@@ -256,7 +299,10 @@ function OrdersPage() {
               </tr>
             ))}
           </tbody>
-        </table>
+               </table>
+      )}
+      {!loading && totalResults > 0 && (
+        <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
       )}
     </div>
   );
