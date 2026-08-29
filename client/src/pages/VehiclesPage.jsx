@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 import { fetchVehicles, createVehicle } from '../features/vehicles/vehicleSlice';
+import TableSkeleton from '../components/TableSkeleton';
+import EmptyState from '../components/EmptyState';
 
 function VehiclesPage() {
   const dispatch = useDispatch();
-  const { list, loading, error } = useSelector((state) => state.vehicles);
+  const { list, loading } = useSelector((state) => state.vehicles);
 
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
@@ -37,8 +40,11 @@ function VehiclesPage() {
     e.preventDefault();
     dispatch(createVehicle(form)).then((result) => {
       if (!result.error) {
+        toast.success('Vehicle added');
         setShowForm(false);
         resetForm();
+      } else {
+        toast.error(result.payload || 'Failed to add vehicle');
       }
     });
   };
@@ -111,10 +117,16 @@ function VehiclesPage() {
         </form>
       )}
 
-      {error && <p className="text-red-600 mb-4">{error}</p>}
-
       {loading ? (
-        <p>Loading...</p>
+        <TableSkeleton rows={5} columns={5} />
+      ) : list.length === 0 ? (
+        <EmptyState
+          icon="🚛"
+          title="No vehicles yet"
+          description="Add a vehicle to start scheduling deliveries."
+          actionLabel="Add Vehicle"
+          onAction={() => setShowForm(true)}
+        />
       ) : (
         <table className="w-full bg-white rounded-lg shadow-md">
           <thead>

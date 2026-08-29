@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 import { fetchSuppliers, createSupplier } from '../features/suppliers/supplierSlice';
+import TableSkeleton from '../components/TableSkeleton';
+import EmptyState from '../components/EmptyState';
 
 function SuppliersPage() {
   const dispatch = useDispatch();
-  const { list, loading, error } = useSelector((state) => state.suppliers);
+  const { list, loading } = useSelector((state) => state.suppliers);
 
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
@@ -37,8 +40,11 @@ function SuppliersPage() {
     e.preventDefault();
     dispatch(createSupplier(form)).then((result) => {
       if (!result.error) {
+        toast.success('Supplier added');
         setShowForm(false);
         resetForm();
+      } else {
+        toast.error(result.payload || 'Failed to add supplier');
       }
     });
   };
@@ -106,10 +112,16 @@ function SuppliersPage() {
         </form>
       )}
 
-      {error && <p className="text-red-600 mb-4">{error}</p>}
-
       {loading ? (
-        <p>Loading...</p>
+        <TableSkeleton rows={5} columns={5} />
+      ) : list.length === 0 ? (
+        <EmptyState
+          icon="🚚"
+          title="No suppliers yet"
+          description="Add your first supplier to start recording purchases."
+          actionLabel="Add Supplier"
+          onAction={() => setShowForm(true)}
+        />
       ) : (
         <table className="w-full bg-white rounded-lg shadow-md">
           <thead>

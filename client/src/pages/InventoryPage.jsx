@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import { fetchTransactions, createTransaction } from '../features/inventory/inventorySlice';
+import TableSkeleton from '../components/TableSkeleton';
+import EmptyState from '../components/EmptyState';
 
 function InventoryPage() {
   const dispatch = useDispatch();
-  const { list, loading, error } = useSelector((state) => state.inventory);
+  const { list, loading } = useSelector((state) => state.inventory);
 
   const [products, setProducts] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
@@ -52,8 +55,11 @@ function InventoryPage() {
     e.preventDefault();
     dispatch(createTransaction(form)).then((result) => {
       if (!result.error) {
+        toast.success('Transaction logged');
         setShowForm(false);
         resetForm();
+      } else {
+        toast.error(result.payload || 'Failed to log transaction');
       }
     });
   };
@@ -156,10 +162,16 @@ function InventoryPage() {
         </form>
       )}
 
-      {error && <p className="text-red-600 mb-4">{error}</p>}
-
       {loading ? (
-        <p>Loading...</p>
+        <TableSkeleton rows={5} columns={7} />
+      ) : list.length === 0 ? (
+        <EmptyState
+          icon="📊"
+          title="No inventory transactions yet"
+          description="Log your first stock movement to start building a history."
+          actionLabel="Log Transaction"
+          onAction={() => setShowForm(true)}
+        />
       ) : (
         <table className="w-full bg-white rounded-lg shadow-md">
           <thead>

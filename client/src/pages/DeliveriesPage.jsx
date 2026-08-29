@@ -1,11 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
-import { fetchDeliveries, createDelivery, updateDeliveryStatus } from '../features/deliveries/deliverySlice';
+import toast from 'react-hot-toast';
+import {
+  fetchDeliveries,
+  createDelivery,
+  updateDeliveryStatus,
+} from '../features/deliveries/deliverySlice';
+import TableSkeleton from '../components/TableSkeleton';
+import EmptyState from '../components/EmptyState';
 
 function DeliveriesPage() {
   const dispatch = useDispatch();
-  const { list, loading, error } = useSelector((state) => state.deliveries);
+  const { list, loading } = useSelector((state) => state.deliveries);
 
   const [orders, setOrders] = useState([]);
   const [vehicles, setVehicles] = useState([]);
@@ -43,14 +50,23 @@ function DeliveriesPage() {
     e.preventDefault();
     dispatch(createDelivery(form)).then((result) => {
       if (!result.error) {
+        toast.success('Delivery scheduled');
         setShowForm(false);
         resetForm();
+      } else {
+        toast.error(result.payload || 'Failed to schedule delivery');
       }
     });
   };
 
   const handleStatusChange = (id, status) => {
-    dispatch(updateDeliveryStatus({ id, status }));
+    dispatch(updateDeliveryStatus({ id, status })).then((result) => {
+      if (!result.error) {
+        toast.success(`Delivery marked as ${status.replace('_', ' ')}`);
+      } else {
+        toast.error(result.payload || 'Failed to update delivery status');
+      }
+    });
   };
 
   return (
@@ -126,10 +142,16 @@ function DeliveriesPage() {
         </form>
       )}
 
-      {error && <p className="text-red-600 mb-4">{error}</p>}
-
       {loading ? (
-        <p>Loading...</p>
+        <TableSkeleton rows={5} columns={6} />
+      ) : list.length === 0 ? (
+        <EmptyState
+          icon="📮"
+          title="No deliveries yet"
+          description="Schedule a delivery to start tracking shipments."
+          actionLabel="Schedule Delivery"
+          onAction={() => setShowForm(true)}
+        />
       ) : (
         <table className="w-full bg-white rounded-lg shadow-md">
           <thead>

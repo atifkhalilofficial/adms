@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import { fetchPurchases, createPurchase } from '../features/purchases/purchaseSlice';
+import TableSkeleton from '../components/TableSkeleton';
+import EmptyState from '../components/EmptyState';
 
 function PurchasesPage() {
   const dispatch = useDispatch();
-  const { list, loading, error } = useSelector((state) => state.purchases);
+  const { list, loading } = useSelector((state) => state.purchases);
 
   const [suppliers, setSuppliers] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
@@ -74,8 +77,11 @@ function PurchasesPage() {
     };
     dispatch(createPurchase(purchaseData)).then((result) => {
       if (!result.error) {
+        toast.success('Purchase recorded');
         setShowForm(false);
         resetForm();
+      } else {
+        toast.error(result.payload || 'Failed to record purchase');
       }
     });
   };
@@ -198,10 +204,16 @@ function PurchasesPage() {
         </form>
       )}
 
-      {error && <p className="text-red-600 mb-4">{error}</p>}
-
       {loading ? (
-        <p>Loading...</p>
+        <TableSkeleton rows={5} columns={5} />
+      ) : list.length === 0 ? (
+        <EmptyState
+          icon="🛒"
+          title="No purchases yet"
+          description="Record your first purchase to restock inventory."
+          actionLabel="New Purchase"
+          onAction={() => setShowForm(true)}
+        />
       ) : (
         <table className="w-full bg-white rounded-lg shadow-md">
           <thead>

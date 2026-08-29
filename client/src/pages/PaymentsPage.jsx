@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import { fetchPayments, createPayment } from '../features/payments/paymentSlice';
+import TableSkeleton from '../components/TableSkeleton';
+import EmptyState from '../components/EmptyState';
 
 function PaymentsPage() {
   const dispatch = useDispatch();
-  const { list, loading, error } = useSelector((state) => state.payments);
+  const { list, loading } = useSelector((state) => state.payments);
 
   const [dealers, setDealers] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -44,8 +47,11 @@ function PaymentsPage() {
     e.preventDefault();
     dispatch(createPayment(form)).then((result) => {
       if (!result.error) {
+        toast.success('Payment recorded');
         setShowForm(false);
         resetForm();
+      } else {
+        toast.error(result.payload || 'Failed to record payment');
       }
     });
   };
@@ -138,10 +144,16 @@ function PaymentsPage() {
         </form>
       )}
 
-      {error && <p className="text-red-600 mb-4">{error}</p>}
-
       {loading ? (
-        <p>Loading...</p>
+        <TableSkeleton rows={5} columns={6} />
+      ) : list.length === 0 ? (
+        <EmptyState
+          icon="💵"
+          title="No payments yet"
+          description="Record a payment to start tracking dealer balances."
+          actionLabel="Record Payment"
+          onAction={() => setShowForm(true)}
+        />
       ) : (
         <table className="w-full bg-white rounded-lg shadow-md">
           <thead>

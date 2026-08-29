@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import {
   fetchWarehouses,
   createWarehouse,
   updateWarehouse,
   deleteWarehouse,
 } from '../features/warehouses/warehouseSlice';
+import TableSkeleton from '../components/TableSkeleton';
+import EmptyState from '../components/EmptyState';
 
 function WarehousesPage() {
   const dispatch = useDispatch();
-  const { list, loading, error } = useSelector((state) => state.warehouses);
+  const { list, loading } = useSelector((state) => state.warehouses);
 
   const [managers, setManagers] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -51,15 +54,25 @@ function WarehousesPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (editingId) {
-      dispatch(updateWarehouse({ id: editingId, data: form })).then(() => {
-        setShowForm(false);
-        setEditingId(null);
-        resetForm();
+      dispatch(updateWarehouse({ id: editingId, data: form })).then((result) => {
+        if (!result.error) {
+          toast.success('Warehouse updated');
+          setShowForm(false);
+          setEditingId(null);
+          resetForm();
+        } else {
+          toast.error(result.payload || 'Failed to update warehouse');
+        }
       });
     } else {
-      dispatch(createWarehouse(form)).then(() => {
-        setShowForm(false);
-        resetForm();
+      dispatch(createWarehouse(form)).then((result) => {
+        if (!result.error) {
+          toast.success('Warehouse added');
+          setShowForm(false);
+          resetForm();
+        } else {
+          toast.error(result.payload || 'Failed to add warehouse');
+        }
       });
     }
   };
@@ -79,7 +92,13 @@ function WarehousesPage() {
 
   const handleDelete = (id) => {
     if (window.confirm('Delete this warehouse?')) {
-      dispatch(deleteWarehouse(id));
+      dispatch(deleteWarehouse(id)).then((result) => {
+        if (!result.error) {
+          toast.success('Warehouse deleted');
+        } else {
+          toast.error(result.payload || 'Failed to delete warehouse');
+        }
+      });
     }
   };
 
@@ -166,10 +185,16 @@ function WarehousesPage() {
         </form>
       )}
 
-      {error && <p className="text-red-600 mb-4">{error}</p>}
-
       {loading ? (
-        <p>Loading...</p>
+        <TableSkeleton rows={5} columns={6} />
+      ) : list.length === 0 ? (
+        <EmptyState
+          icon="🏭"
+          title="No warehouses yet"
+          description="Add your first warehouse to start tracking inventory locations."
+          actionLabel="Add Warehouse"
+          onAction={() => setShowForm(true)}
+        />
       ) : (
         <table className="w-full bg-white rounded-lg shadow-md">
           <thead>
