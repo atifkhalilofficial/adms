@@ -1,11 +1,21 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchDealers, createDealer, updateDealer, deleteDealer } from '../features/dealers/dealerSlice';
+import toast from 'react-hot-toast';
+import {
+  fetchDealers,
+  createDealer,
+  updateDealer,
+  deleteDealer,
+} from '../features/dealers/dealerSlice';
+import TableSkeleton from '../components/TableSkeleton';
+import EmptyState from '../components/EmptyState';
+
 function DealersPage() {
   const dispatch = useDispatch();
-  const { list, loading, error } = useSelector((state) => state.dealers);
+  const { list, loading } = useSelector((state) => state.dealers);
 
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({
     name: '',
     businessName: '',
@@ -20,87 +30,100 @@ function DealersPage() {
     creditLimit: 0,
   });
 
-  const [editingId, setEditingId] = useState(null);
-
   useEffect(() => {
     dispatch(fetchDealers());
   }, [dispatch]);
+
+  const resetForm = () => {
+    setForm({
+      name: '',
+      businessName: '',
+      phone: '',
+      email: '',
+      province: '',
+      district: '',
+      city: '',
+      address: '',
+      cnic: '',
+      category: 'retailer',
+      creditLimit: 0,
+    });
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-const resetForm = () => {
-  setForm({
-    name: '',
-    businessName: '',
-    phone: '',
-    email: '',
-    province: '',
-    district: '',
-    city: '',
-    address: '',
-    cnic: '',
-    category: 'retailer',
-    creditLimit: 0,
-  });
-};
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (editingId) {
+      dispatch(updateDealer({ id: editingId, data: form })).then((result) => {
+        if (!result.error) {
+          toast.success('Dealer updated');
+          setShowForm(false);
+          setEditingId(null);
+          resetForm();
+        } else {
+          toast.error(result.payload || 'Failed to update dealer');
+        }
+      });
+    } else {
+      dispatch(createDealer(form)).then((result) => {
+        if (!result.error) {
+          toast.success('Dealer added');
+          setShowForm(false);
+          resetForm();
+        } else {
+          toast.error(result.payload || 'Failed to add dealer');
+        }
+      });
+    }
+  };
 
-
-const handleEdit = (dealer) => {
-  setForm({
-    name: dealer.name,
-    businessName: dealer.businessName,
-    phone: dealer.phone,
-    email: dealer.email || '',
-    province: dealer.province,
-    district: dealer.district,
-    city: dealer.city,
-    address: dealer.address,
-    cnic: dealer.cnic,
-    category: dealer.category,
-    creditLimit: dealer.creditLimit,
-  });
-  setEditingId(dealer._id);
-  setShowForm(true);
-};
-
-const handleDelete = (id) => {
-  if (window.confirm('Delete this dealer?')) {
-    dispatch(deleteDealer(id));
-  }
-};
-
-const handleSubmit = (e) => {
-  e.preventDefault();
-  if (editingId) {
-    dispatch(updateDealer({ id: editingId, data: form })).then(() => {
-      setShowForm(false);
-      setEditingId(null);
-      resetForm();
+  const handleEdit = (dealer) => {
+    setForm({
+      name: dealer.name,
+      businessName: dealer.businessName,
+      phone: dealer.phone,
+      email: dealer.email || '',
+      province: dealer.province,
+      district: dealer.district,
+      city: dealer.city,
+      address: dealer.address,
+      cnic: dealer.cnic,
+      category: dealer.category,
+      creditLimit: dealer.creditLimit,
     });
-  } else {
-    dispatch(createDealer(form)).then(() => {
-      setShowForm(false);
-      resetForm();
-    });
-  }
-};
+    setEditingId(dealer._id);
+    setShowForm(true);
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm('Delete this dealer?')) {
+      dispatch(deleteDealer(id)).then((result) => {
+        if (!result.error) {
+          toast.success('Dealer deleted');
+        } else {
+          toast.error(result.payload || 'Failed to delete dealer');
+        }
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Dealers</h1>
         <button
-  onClick={() => {
-    setShowForm(!showForm);
-    setEditingId(null);
-    resetForm();
-  }}
-  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
->
-  {showForm ? 'Cancel' : 'Add Dealer'}
-</button>
+          onClick={() => {
+            setShowForm(!showForm);
+            setEditingId(null);
+            resetForm();
+          }}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          {showForm ? 'Cancel' : 'Add Dealer'}
+        </button>
       </div>
 
       {showForm && (
@@ -198,18 +221,24 @@ const handleSubmit = (e) => {
             className="border rounded px-3 py-2"
           />
           <button
-  type="submit"
-  className="col-span-2 bg-green-600 text-white py-2 rounded hover:bg-green-700"
->
-  {editingId ? 'Update Dealer' : 'Save Dealer'}
-</button>
+            type="submit"
+            className="col-span-2 bg-green-600 text-white py-2 rounded hover:bg-green-700"
+          >
+            {editingId ? 'Update Dealer' : 'Save Dealer'}
+          </button>
         </form>
       )}
 
-      {error && <p className="text-red-600 mb-4">{error}</p>}
-
       {loading ? (
-        <p>Loading...</p>
+        <TableSkeleton rows={5} columns={7} />
+      ) : list.length === 0 ? (
+        <EmptyState
+          icon="🏬"
+          title="No dealers yet"
+          description="Add your first dealer to get started."
+          actionLabel="Add Dealer"
+          onAction={() => setShowForm(true)}
+        />
       ) : (
         <table className="w-full bg-white rounded-lg shadow-md">
           <thead>
@@ -235,19 +264,19 @@ const handleSubmit = (e) => {
                 <td className="p-3">{dealer.creditLimit}</td>
                 <td className="p-3">{dealer.outstandingBalance}</td>
                 <td className="p-3 flex gap-2">
-  <button
-    onClick={() => handleEdit(dealer)}
-    className="text-blue-600 hover:underline text-sm"
-  >
-    Edit
-  </button>
-  <button
-    onClick={() => handleDelete(dealer._id)}
-    className="text-red-600 hover:underline text-sm"
-  >
-    Delete
-  </button>
-</td>
+                  <button
+                    onClick={() => handleEdit(dealer)}
+                    className="text-blue-600 hover:underline text-sm"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(dealer._id)}
+                    className="text-red-600 hover:underline text-sm"
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

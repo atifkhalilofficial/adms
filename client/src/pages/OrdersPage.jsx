@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import { fetchOrders, createOrder, updateOrderStatus } from '../features/orders/orderSlice';
+import TableSkeleton from '../components/TableSkeleton';
+import EmptyState from '../components/EmptyState';
 
 function OrdersPage() {
   const dispatch = useDispatch();
-  const { list, loading, error } = useSelector((state) => state.orders);
+  const { list, loading } = useSelector((state) => state.orders);
 
   const [dealers, setDealers] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
@@ -75,14 +78,23 @@ function OrdersPage() {
     };
     dispatch(createOrder(orderData)).then((result) => {
       if (!result.error) {
+        toast.success('Order placed');
         setShowForm(false);
         resetForm();
+      } else {
+        toast.error(result.payload || 'Failed to place order');
       }
     });
   };
 
   const handleStatusChange = (id, status) => {
-    dispatch(updateOrderStatus({ id, status }));
+    dispatch(updateOrderStatus({ id, status })).then((result) => {
+      if (!result.error) {
+        toast.success(`Order marked as ${status}`);
+      } else {
+        toast.error(result.payload || 'Failed to update order status');
+      }
+    });
   };
 
   return (
@@ -101,10 +113,7 @@ function OrdersPage() {
       </div>
 
       {showForm && (
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white p-6 rounded-lg shadow-md mb-6"
-        >
+        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md mb-6">
           <div className="grid grid-cols-2 gap-4 mb-4">
             <select
               value={dealer}
@@ -195,10 +204,16 @@ function OrdersPage() {
         </form>
       )}
 
-      {error && <p className="text-red-600 mb-4">{error}</p>}
-
       {loading ? (
-        <p>Loading...</p>
+        <TableSkeleton rows={5} columns={6} />
+      ) : list.length === 0 ? (
+        <EmptyState
+          icon="🧾"
+          title="No orders yet"
+          description="Create your first order to get started."
+          actionLabel="New Order"
+          onAction={() => setShowForm(true)}
+        />
       ) : (
         <table className="w-full bg-white rounded-lg shadow-md">
           <thead>

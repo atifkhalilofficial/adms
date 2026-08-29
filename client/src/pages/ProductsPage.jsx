@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import {
   fetchProducts,
   createProduct,
@@ -8,10 +9,12 @@ import {
   deleteProduct,
   uploadProductImage,
 } from '../features/products/productSlice';
+import TableSkeleton from '../components/TableSkeleton';
+import EmptyState from '../components/EmptyState';
 
 function ProductsPage() {
   const dispatch = useDispatch();
-  const { list, loading, error } = useSelector((state) => state.products);
+  const { list, loading } = useSelector((state) => state.products);
 
   const [warehouses, setWarehouses] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -60,16 +63,22 @@ function ProductsPage() {
     if (editingId) {
       dispatch(updateProduct({ id: editingId, data: form })).then((result) => {
         if (!result.error) {
+          toast.success('Product updated');
           setShowForm(false);
           setEditingId(null);
           resetForm();
+        } else {
+          toast.error(result.payload || 'Failed to update product');
         }
       });
     } else {
       dispatch(createProduct(form)).then((result) => {
         if (!result.error) {
+          toast.success('Product added');
           setShowForm(false);
           resetForm();
+        } else {
+          toast.error(result.payload || 'Failed to add product');
         }
       });
     }
@@ -93,14 +102,25 @@ function ProductsPage() {
 
   const handleDelete = (id) => {
     if (window.confirm('Delete this product?')) {
-      dispatch(deleteProduct(id));
+      dispatch(deleteProduct(id)).then((result) => {
+        if (!result.error) {
+          toast.success('Product deleted');
+        } else {
+          toast.error(result.payload || 'Failed to delete product');
+        }
+      });
     }
   };
 
   const handleImageUpload = (id, e) => {
     const file = e.target.files[0];
     if (file) {
-      dispatch(uploadProductImage({ id, file }));
+      const uploadPromise = dispatch(uploadProductImage({ id, file })).unwrap();
+      toast.promise(uploadPromise, {
+        loading: 'Uploading image...',
+        success: 'Image uploaded',
+        error: 'Failed to upload image',
+      });
     }
   };
 
@@ -211,10 +231,16 @@ function ProductsPage() {
         </form>
       )}
 
-      {error && <p className="text-red-600 mb-4">{error}</p>}
-
       {loading ? (
-        <p>Loading...</p>
+        <TableSkeleton rows={5} columns={8} />
+      ) : list.length === 0 ? (
+        <EmptyState
+          icon="📦"
+          title="No products yet"
+          description="Add your first product to start tracking stock."
+          actionLabel="Add Product"
+          onAction={() => setShowForm(true)}
+        />
       ) : (
         <table className="w-full bg-white rounded-lg shadow-md">
           <thead>
