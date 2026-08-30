@@ -3,6 +3,9 @@ const Product = require('../models/Product');
 const InventoryTransaction = require('../models/InventoryTransaction');
 const Dealer = require('../models/Dealer');
 const createNotification = require('../utils/createNotification');
+const Invoice = require('../models/Invoice');
+const generateInvoiceNumber = require('../utils/generateInvoiceNumber');
+
 
 // @route  POST /api/orders
 const createOrder = async (req, res) => {
@@ -34,12 +37,33 @@ const createOrder = async (req, res) => {
       createdBy: req.user._id,
     });
 
-        const dealerDoc = await Dealer.findById(dealer);
-    if (dealerDoc) {
-      dealerDoc.outstandingBalance += totalAmount;
-      await dealerDoc.save();
+        const invoiceNumber = await generateInvoiceNumber();
+    const invoiceItems = resolvedItems.map((item) => {
+      const productDoc = item.product; // still an ObjectId here, resolve below
+      return item;
+    });
+
+    // Build a readable snapshot of items using the products we already looked up
+    const snapshotItems = [];
+    for (const item of resolvedItems) {
+      const p = await Product.findById(item.product).select('name sku');
+      snapshotItems.push({
+        productName: p?.name || 'Unknown',
+        sku: p?.sku || '—',
+        quantity: item.quantity,
+        price: item.price,
+        lineTotal: item.price * item.quantity,
+      });
     }
 
+    await Invoice.create({
+      invoiceNumber,
+      order: order._id,
+      dealer,
+      items: snapshotItems,
+      totalAmount,
+      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+    });
     await order.populate([
       { path: 'dealer', select: 'name businessName' },
       { path: 'warehouse', select: 'name city' },

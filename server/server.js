@@ -23,6 +23,7 @@ const deliveryRoutes = require('./routes/deliveryRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const invoiceRoutes = require('./routes/invoiceRoutes');
 
 
 const app = express();
@@ -49,6 +50,8 @@ app.use('/api/deliveries', deliveryRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/invoices', invoiceRoutes);
+
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
